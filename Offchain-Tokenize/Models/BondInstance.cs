@@ -12,5 +12,6 @@ namespace Offchain_Tokenize.Models
         public string Status { get; set; } = string.Empty;
         public string Currency { get; set; } = string.Empty;
         public DateTime IssuanceDate { get; set; }
+        public string ConversionRatio { get; set; }
     }
 }

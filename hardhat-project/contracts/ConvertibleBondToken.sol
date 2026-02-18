@@ -47,7 +47,10 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         uint256 totalConverted;
         bool isActive;
         bool conversionEnabled;
-        string terms;
+        string symbol;
+        string name;
+        string isin;
+        uint256 couponRate; // in basis points (e.g., 500 for 5%)
     }
 
     // Equity class information
@@ -80,13 +83,28 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         uint256 conversionRatio,
         uint256 maturityDate,
         uint256 faceValue,
-        string terms
+        string symbol,
+        string name,
+        string isin,
+        uint256 couponRate
     );
 
     event EquityClassCreated(
         uint256 indexed equityId,
         string className,
         string metadata
+    );
+
+    event ConvertibleBondCreated(
+        uint256 indexed bondId,
+        uint256 indexed equityId,
+        uint256 conversionRatio,
+        uint256 maturityDate,
+        uint256 faceValue,
+        string symbol,
+        string name,
+        string isin,
+        uint256 couponRate
     );
 
     event BondsIssued(
@@ -299,7 +317,7 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
     function createEquityClass(
         string memory className,
         string memory metadata
-    ) external onlyRole(ADMIN_ROLE) returns (uint256) {
+    ) private  returns (uint256) {
         _equityIdCounter++;
         uint256 equityId = _equityIdCounter;
 
@@ -325,8 +343,11 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         uint256 conversionRatio,
         uint256 maturityDate,
         uint256 faceValue,
-        string memory terms
-    ) external onlyRole(ADMIN_ROLE) returns (uint256) {
+        string memory symbol,
+        string memory name,
+        string memory isin,
+        uint256 couponRate
+    ) private  returns (uint256) {
         require(equityClasses[equityTokenId].isActive, "Equity class does not exist");
         require(conversionRatio > 0, "Conversion ratio must be positive");
         require(maturityDate > block.timestamp, "Maturity date must be in future");
@@ -337,6 +358,21 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
 
         require(bondId >= BOND_ID_START && bondId <= BOND_ID_END, "Invalid bond ID");
 
+
+// struct BondSeries {
+//         uint256 equityTokenId;
+//         uint256 conversionRatio;
+//         uint256 maturityDate;
+//         uint256 faceValue;
+//         uint256 totalIssued;
+//         uint256 totalConverted;
+//         bool isActive;
+//         bool conversionEnabled;
+//         string symbol;
+//         string name;
+//         string isin;
+//         uint256 couponRate; // in basis points (e.g., 500 for 5%)
+//     }
         bondSeries[bondId] = BondSeries({
             equityTokenId: equityTokenId,
             conversionRatio: conversionRatio,
@@ -346,12 +382,54 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
             totalConverted: 0,
             isActive: true,
             conversionEnabled: true,
-            terms: terms
+            symbol: symbol,
+            name: name,
+            isin: isin,
+            couponRate: couponRate
         });
 
-        emit BondSeriesCreated(bondId, equityTokenId, conversionRatio, maturityDate, faceValue, terms);
+        emit BondSeriesCreated(bondId, equityTokenId, conversionRatio, maturityDate, faceValue, symbol, name, isin, couponRate);
 
         return bondId;
+    }
+
+    /**
+     * @dev Creates a new convertible bond setup by creating both an equity class and bond series.
+     */
+    function createConvertibleBond(
+        string memory className,
+        string memory metadata,
+        uint256 conversionRatio,
+        uint256 maturityDate,
+        uint256 faceValue,
+        string memory symbol,
+        string memory name,
+        string memory isin,
+        uint256 couponRate
+    ) external onlyRole(ISSUER_ROLE) whenNotPaused returns (uint256 equityId, uint256 bondId) {
+        equityId = createEquityClass(className, metadata);
+        bondId = createBondSeries(
+            equityId,
+            conversionRatio,
+            maturityDate,
+            faceValue,
+            symbol,
+            name,
+            isin,
+            couponRate
+        );
+
+        emit ConvertibleBondCreated(
+            bondId,
+            equityId,
+            conversionRatio,
+            maturityDate,
+            faceValue,
+            symbol,
+            name,
+            isin,
+            couponRate
+        );
     }
 
     /**

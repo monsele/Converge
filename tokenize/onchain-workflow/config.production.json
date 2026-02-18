@@ -1,3 +1,8 @@
 {
-  "schedule": "*/30 * * * * *"
+  "schedule": "*/30 * * * * *",
+  "network": "ethereum-mainnet",
+  "bondMasterAddress": "0x0000000000000000000000000000000000000001",
+  "convertibleBondTokenAddress": "0x0000000000000000000000000000000000000002",
+  "apiBaseUrl": "https://api.tokenize.com",
+  "fromBlock": 0
 }

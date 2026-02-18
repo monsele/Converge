@@ -15,20 +15,40 @@
 #     secrets-path: "../secrets.yaml"       # Path to secrets file (project root by default)
 
 # ==========================================================================
-staging-settings:
+# Onchain Bond Issuance Workflow (HTTP Trigger from C#)
+# ==========================================================================
+staging-issuance:
   user-workflow:
     workflow-name: "onchain-workflow-staging"
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.staging.json"
     secrets-path: ""
-    
 
-# ==========================================================================
-production-settings:
+production-issuance:
   user-workflow:
     workflow-name: "onchain-workflow-production"
   workflow-artifacts:
     workflow-path: "./main.ts"
+    config-path: "./config.production.json"
+    secrets-path: ""
+
+# ==========================================================================
+# ConvertibleBondCreated Event Listener Workflow
+# Listens for ConvertibleBondCreated events and calls api/createBondConvert
+# ==========================================================================
+staging-bond-created-listener:
+  user-workflow:
+    workflow-name: "convertible-bond-listener-staging"
+  workflow-artifacts:
+    workflow-path: "./convertibleBondListener.ts"
+    config-path: "./config.staging.json"
+    secrets-path: ""
+
+production-bond-created-listener:
+  user-workflow:
+    workflow-name: "convertible-bond-listener-production"
+  workflow-artifacts:
+    workflow-path: "./convertibleBondListener.ts"
     config-path: "./config.production.json"
     secrets-path: ""
