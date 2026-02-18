@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "DjSGHjXJ1KLrqgjMCO+03JWNmya9D7tqaoGydlhVnG0=",
+  "Source": "Offchain-Tokenize",
+  "BasePath": "_content/Offchain-Tokenize",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

@@ -1,0 +1,6 @@
+@Offchain_Tokenize_HostAddress = http://localhost:5231
+
+GET {{Offchain_Tokenize_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
