@@ -358,21 +358,6 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
 
         require(bondId >= BOND_ID_START && bondId <= BOND_ID_END, "Invalid bond ID");
 
-
-// struct BondSeries {
-//         uint256 equityTokenId;
-//         uint256 conversionRatio;
-//         uint256 maturityDate;
-//         uint256 faceValue;
-//         uint256 totalIssued;
-//         uint256 totalConverted;
-//         bool isActive;
-//         bool conversionEnabled;
-//         string symbol;
-//         string name;
-//         string isin;
-//         uint256 couponRate; // in basis points (e.g., 500 for 5%)
-//     }
         bondSeries[bondId] = BondSeries({
             equityTokenId: equityTokenId,
             conversionRatio: conversionRatio,

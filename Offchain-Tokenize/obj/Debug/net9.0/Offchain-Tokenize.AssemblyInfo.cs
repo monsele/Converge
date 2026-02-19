@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Offchain-Tokenize")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+162c6fac84d3fc40ee076184d2f5a56061eb519a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+672d1740ed1468a67f91ee2e60cc660ca4fd28df")]
 [assembly: System.Reflection.AssemblyProductAttribute("Offchain-Tokenize")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Offchain-Tokenize")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
