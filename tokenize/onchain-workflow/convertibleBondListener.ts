@@ -40,6 +40,16 @@ interface ApiBondConvertRequest {
   timestamp: number;
 }
 
+interface BondTradeCallbackRequest {
+  tradeId: number;
+  status: "Completed" | "Failed";
+  transactionHash?: string;
+  blockNumber?: number;
+  bondId?: number;
+  equityId?: number;
+  error?: string;
+}
+
 interface DecodedConvertibleBondArgs {
   bondId: bigint;
   equityId: bigint;
@@ -77,6 +87,58 @@ function toSafeNumber(value: bigint, fieldName: string): number {
     throw new Error(`${fieldName} is below Number.MIN_SAFE_INTEGER`);
   }
   return Number(value);
+}
+
+function extractTradeId(symbol: string, name: string, isin: string): number | null {
+  const sources = [symbol, name, isin];
+  const patterns = [
+    /TRD[-_](\d+)/i,
+    /trade[-_ ]?id[:# ]?(\d+)/i,
+    /\bTID(\d+)\b/i,
+  ];
+
+  for (const source of sources) {
+    for (const pattern of patterns) {
+      const match = source.match(pattern);
+      if (!match?.[1]) continue;
+
+      const value = Number.parseInt(match[1], 10);
+      if (Number.isFinite(value) && value > 0) {
+        return value;
+      }
+    }
+  }
+
+  return null;
+}
+
+function sendJsonWithConsensus(
+  runtime: Runtime<ListenerConfig>,
+  url: string,
+  body: string,
+  workflowName: string
+): number {
+  return runtime
+    .runInNodeMode(
+      (nodeRuntime, requestUrl: string, requestBody: string, headerValue: string) => {
+        const httpClient = new cre.capabilities.HTTPClient();
+        const response = httpClient
+          .sendRequest(nodeRuntime, {
+            url: requestUrl,
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CRE-Workflow": headerValue,
+            },
+            body: requestBody,
+          })
+          .result();
+
+        return response.statusCode;
+      },
+      consensusIdenticalAggregation<number>()
+    )(url, body, workflowName)
+    .result();
 }
 
 const onConvertibleBondCreated = (
@@ -132,33 +194,64 @@ const onConvertibleBondCreated = (
     `ConvertibleBondCreated received. bondId=${requestPayload.bondId}, equityId=${requestPayload.equityId}`
   );
 
-  const statusCode = runtime
-    .runInNodeMode(
-      (nodeRuntime, url: string, body: string) => {
-        const httpClient = new cre.capabilities.HTTPClient();
-        const response = httpClient
-          .sendRequest(nodeRuntime, {
-            url,
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CRE-Workflow": "ConvertibleBondCreated",
-            },
-            body,
-          })
-          .result();
+  const tradeId = extractTradeId(args.symbol, args.name, args.isin);
 
-        return response.statusCode;
-      },
-      consensusIdenticalAggregation<number>()
-    )(
-      `${apiBaseUrl}/api/createBondConvert`,
-      JSON.stringify(requestPayload)
-    )
-    .result();
+  const statusCode = sendJsonWithConsensus(
+    runtime,
+    `${apiBaseUrl}/api/createBondConvert`,
+    JSON.stringify(requestPayload),
+    "ConvertibleBondCreated"
+  );
 
   if (statusCode < 200 || statusCode >= 300) {
+    if (tradeId) {
+      const failedCallback: BondTradeCallbackRequest = {
+        tradeId,
+        status: "Failed",
+        transactionHash: requestPayload.transactionHash,
+        blockNumber: requestPayload.blockNumber,
+        bondId: requestPayload.bondId,
+        equityId: requestPayload.equityId,
+        error: `api/createBondConvert returned status ${statusCode}`,
+      };
+
+      sendJsonWithConsensus(
+        runtime,
+        `${apiBaseUrl}/api/BondTrades/cre-callback`,
+        JSON.stringify(failedCallback),
+        "ConvertibleBondCreatedCallback"
+      );
+    }
+
     throw new Error(`api/createBondConvert returned status ${statusCode}`);
+  }
+
+  if (tradeId) {
+    const completedCallback: BondTradeCallbackRequest = {
+      tradeId,
+      status: "Completed",
+      transactionHash: requestPayload.transactionHash,
+      blockNumber: requestPayload.blockNumber,
+      bondId: requestPayload.bondId,
+      equityId: requestPayload.equityId,
+    };
+
+    const callbackStatusCode = sendJsonWithConsensus(
+      runtime,
+      `${apiBaseUrl}/api/BondTrades/cre-callback`,
+      JSON.stringify(completedCallback),
+      "ConvertibleBondCreatedCallback"
+    );
+
+    if (callbackStatusCode < 200 || callbackStatusCode >= 300) {
+      throw new Error(
+        `api/BondTrades/cre-callback returned status ${callbackStatusCode}`
+      );
+    }
+  } else {
+    runtime.log(
+      "No tradeId correlation found in symbol/name/isin. Skipping BondTrades callback."
+    );
   }
 
   runtime.log(

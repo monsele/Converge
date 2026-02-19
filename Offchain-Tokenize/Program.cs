@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Offchain_Tokenize.Configuration;
 using Offchain_Tokenize.Models;
+using Offchain_Tokenize.Services;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<CreWorkflowOptions>(
+    builder.Configuration.GetSection(CreWorkflowOptions.SectionName));
+builder.Services.AddHttpClient<ICreWorkflowClient, CreWorkflowClient>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

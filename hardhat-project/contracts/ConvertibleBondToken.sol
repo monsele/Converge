@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../interfaces/IReceiver.sol";
 
@@ -17,7 +16,7 @@ import "../interfaces/IReceiver.sol";
  * - Can be triggered by CRE workflows for automated bond operations
  * - Validates that calls come from authorized Chainlink Forwarder
  */
-contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, ReentrancyGuard, IReceiver {
+contract ConvertibleBondTokenCRE is ERC1155, AccessControl, ReentrancyGuard, IReceiver {
 
     // Role definitions
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -177,8 +176,7 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
      */
     function onReport(bytes calldata metadata, bytes calldata report) 
         external 
-        override 
-        whenNotPaused 
+        override  
     {
         require(msg.sender == chainlinkForwarder, "Only Chainlink Forwarder can call");
 
@@ -391,7 +389,7 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         string memory name,
         string memory isin,
         uint256 couponRate
-    ) external onlyRole(ISSUER_ROLE) whenNotPaused returns (uint256 equityId, uint256 bondId) {
+    ) external onlyRole(ISSUER_ROLE) returns (uint256 equityId, uint256 bondId) {
         equityId = createEquityClass(className, metadata);
         bondId = createBondSeries(
             equityId,
@@ -424,7 +422,7 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         uint256 bondId,
         address recipient,
         uint256 amount
-    ) external onlyRole(ISSUER_ROLE) whenNotPaused {
+    ) external {
         require(bondSeries[bondId].isActive, "Bond series is not active");
         require(bondholderWhitelist[bondId][recipient], "Recipient not whitelisted");
         require(amount > 0, "Amount must be positive");
@@ -443,7 +441,7 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
     function convertBondsToEquity(
         uint256 bondId,
         uint256 bondAmount
-    ) external nonReentrant whenNotPaused {
+    ) external nonReentrant  {
         require(bondSeries[bondId].isActive, "Bond series does not exist");
         require(bondSeries[bondId].conversionEnabled, "Conversion is disabled");
         require(bondAmount > 0, "Amount must be positive");
@@ -517,13 +515,13 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         _setURI(newuri);
     }
 
-    function pause() external onlyRole(ADMIN_ROLE) {
-        _pause();
-    }
+    // function pause() external onlyRole(ADMIN_ROLE) {
+    //     _pause();
+    // }
 
-    function unpause() external onlyRole(ADMIN_ROLE) {
-        _unpause();
-    }
+    // function unpause() external onlyRole(ADMIN_ROLE) {
+    //     _unpause();
+    // }
 
     function getBondSeries(uint256 bondId) external view returns (BondSeries memory) {
         return bondSeries[bondId];
@@ -547,7 +545,7 @@ contract ConvertibleBondTokenCRE is ERC1155, AccessControl, Pausable, Reentrancy
         address to,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) internal override whenNotPaused {
+    ) internal override  {
         if (from != address(0) && to != address(0)) {
             for (uint256 i = 0; i < ids.length; i++) {
                 uint256 id = ids[i];

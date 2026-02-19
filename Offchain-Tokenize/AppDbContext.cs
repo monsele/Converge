@@ -16,11 +16,22 @@ namespace Offchain_Tokenize.Models
         public DbSet<Investors> Investors { get; set; }
         public DbSet<BondInstance> BondInstances { get; set; }
         public DbSet<EquityInstance> EquityInstances { get; set; }
+        public DbSet<BondTrade> BondTrades { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Add any custom configuration here if needed
+            modelBuilder.Entity<BondTrade>()
+                .HasOne(t => t.Investor)
+                .WithMany()
+                .HasForeignKey(t => t.InvestorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BondTrade>()
+                .HasOne(t => t.BondInstance)
+                .WithMany()
+                .HasForeignKey(t => t.BondInstanceId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
