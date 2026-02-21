@@ -130,3 +130,9 @@ D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\tr\Mi
 D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\obj\Debug\net9.0\Offchain-Tokenize.sourcelink.json
+D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\Offchain-Tokenize.xml
+D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\obj\Debug\net9.0\Offchain-Tokenize.xml
+D:\Eronmonsele\Documents\repos\tokenize\Offchain-Tokenize\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
